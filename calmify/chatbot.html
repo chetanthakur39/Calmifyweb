@@ -1,0 +1,240 @@
+<!-- Calmify AI Chatbot -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+  #calmify-chatbot-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    background: var(--primary);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  #calmify-chatbot-button:hover {
+    transform: scale(1.1);
+  }
+
+  #calmify-chatbot-box {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 360px;
+    max-height: 550px;
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+  }
+
+  .calmify-chat-header {
+    background: var(--primary);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .calmify-chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .calmify-chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: var(--background);
+  }
+
+  .calmify-chat-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 30px;
+    border: none;
+    font-size: 14px;
+    background: var(--card-bg);
+    color: var(--text);
+  }
+
+  .calmify-chat-input button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .chat-bubble {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .user-msg {
+    align-self: flex-end;
+    background: var(--primary);
+    color: white;
+  }
+
+  .bot-msg {
+    align-self: flex-start;
+    background: var(--secondary);
+    color: white;
+  }
+</style>
+
+<div id="calmify-chatbot-button" title="Chat with Calmify">
+  <i class="fas fa-comments"></i>
+</div>
+
+<div id="calmify-chatbot-box">
+  <div class="calmify-chat-header">Calmify AI Assistant</div>
+  <div class="calmify-chat-container" id="calmifyChatLog"></div>
+  <div class="calmify-chat-input">
+    <input type="text" id="calmifyPrompt" placeholder="How can I help you today?" />
+    <button id="calmifySubmit"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script>
+  const calmifyBtn = document.getElementById("calmify-chatbot-button");
+  const calmifyBox = document.getElementById("calmify-chatbot-box");
+  const calmifySubmit = document.getElementById("calmifySubmit");
+  const calmifyPrompt = document.getElementById("calmifyPrompt");
+  const calmifyLog = document.getElementById("calmifyChatLog");
+
+  const API_URL =
+"https://router.huggingface.co/v1/chat/completions";
+  const predefinedAnswers = {
+    "what is your name": "My name is Calmify, your mental wellness assistant."
+  };
+
+  calmifyBtn.onclick = () => {
+    calmifyBox.style.display = calmifyBox.style.display === "flex" ? "none" : "flex";
+  };
+
+  function appendMessage(text, isUser = false) {
+    const div = document.createElement("div");
+    div.className = `chat-bubble ${isUser ? "user-msg" : "bot-msg"}`;
+    div.textContent = text;
+    calmifyLog.appendChild(div);
+    calmifyLog.scrollTop = calmifyLog.scrollHeight;
+  }
+
+async function handleChat(message) {
+
+    if (!message.trim()) return;
+
+    const lowerMsg = message.toLowerCase().trim();
+
+    appendMessage(message, true);
+    calmifyPrompt.value = "";
+
+    if (predefinedAnswers[lowerMsg]) {
+        setTimeout(() => {
+            appendMessage(predefinedAnswers[lowerMsg], false);
+        }, 500);
+        return;
+    }
+
+    const responseDiv = document.createElement("div");
+    responseDiv.className = "chat-bubble bot-msg";
+    responseDiv.textContent = "Typing...";
+    calmifyLog.appendChild(responseDiv);
+
+    try {
+
+        const res = await fetch("https://router.huggingface.co/v1/chat/completions", {
+
+            method: "POST",
+
+            headers: {
+
+                "Authorization": "Bearer   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",
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                model: "Qwen/Qwen2.5-7B-Instruct:together",
+
+                messages: [
+
+                    {
+                        role: "system",
+                        content:
+                        "You are Calmify AI, a friendly mental wellness assistant. Give supportive and concise responses."
+                    },
+
+                    {
+                        role: "user",
+                        content: message
+                    }
+
+                ],
+
+                max_tokens: 300,
+                temperature: 0.7
+
+            })
+
+        });
+
+        const data = await res.json();
+
+        console.log(data);
+
+        responseDiv.textContent =
+            data?.choices?.[0]?.message?.content ||
+            "No response received.";
+
+    }
+    catch (e) {
+
+        responseDiv.textContent =
+            "Unable to connect to AI.";
+
+        console.log(e);
+
+    }
+
+    calmifyLog.scrollTop = calmifyLog.scrollHeight;
+
+}
+
+  calmifySubmit.onclick = () => handleChat(calmifyPrompt.value);
+  calmifyPrompt.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+    handleChat(calmifyPrompt.value);
+  }
+
+  });
+
+</script>

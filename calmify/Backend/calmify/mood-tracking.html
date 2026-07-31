@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mood Tracking | Calmify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reuse your existing CSS variables and base styles */
+        :root {
+            --primary-light: #6c9bc5;
+            --primary: #4a7db8;
+            --primary-dark: #2a5d9e;
+            --secondary: #8bc2a0;
+            --accent: #d4a5a5;
+            --background: #f0f5fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --header-height: 80px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --border-radius: 16px;
+        }
+
+        .dark-mode {
+            --primary-light: #7dabdf;
+            --primary: #5a8bc9;
+            --primary-dark: #3a6db0;
+            --secondary: #9dd9b6;
+            --accent: #e4b9b9;
+            --background: #121826;
+            --text: #e2e8f0;
+            --card-bg: #1a243a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Reuse your existing base styles here */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            scroll-behavior: smooth;
+        }
+
+        /* Add your header, footer, and other common styles from the main page */
+        
+        /* Page-specific styles */
+        .mood-tracking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 5% 50px;
+        }
+
+        .mood-tracker-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .mood-tracker-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .mood-tracker-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.7;
+        }
+
+        .mood-tracker-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .mood-input-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .mood-input-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .mood-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .mood-option {
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mood-option:hover {
+            transform: translateY(-5px);
+        }
+
+        .mood-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 20px;
+            background-color: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .mood-option.selected .mood-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .mood-textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 20px;
+            resize: none;
+            min-height: 120px;
+        }
+
+        .mood-submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .mood-submit-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.2);
+        }
+
+        .mood-history {
+            margin-top: 50px;
+        }
+
+        .mood-history h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .mood-history-item {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .mood-history-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .mood-history-content {
+            flex-grow: 1;
+        }
+
+        .mood-history-date {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .mood-history-text {
+            margin-bottom: 10px;
+        }
+
+        .mood-history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mood-history-actions button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .mood-insights {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-top: 50px;
+        }
+
+        .mood-insights h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .insight-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .insight-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .mood-tracker-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Reuse your header from the main page -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-spa"></i>
+            Calmify
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li class="dropdown">
+                    <a href="#">Features <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="mood-tracking.html"><i class="fas fa-brain"></i> AI Mood Tracking</a>
+                        <a href="stress-detection.html"><i class="fas fa-heartbeat"></i> Stress Detection</a>
+                        <a href="vr-meditation.html"><i class="fas fa-vr-cardboard"></i> VR Meditation</a>
+                        <a href="reports.html"><i class="fas fa-chart-line"></i> Mental Status Reports</a>
+                        <a href="psychologists.html"><i class="fas fa-user-md"></i> Book a Psychologist</a>
+                        <a href="meetups.html"><i class="fas fa-users"></i> Wellness Meetups</a>
+                        <a href="games.html"><i class="fas fa-gamepad"></i> Relaxing Games</a>
+                        <a href="shop.html"><i class="fas fa-shopping-cart"></i> Shop Products</a>
+                        <a href="chatbot.html"><i class="fas fa-robot"></i> AI Chatbot</a>
+                        <a href="mood-scanner.html"><i class="fas fa-camera"></i> Mood Scanner</a>
+                    </div>
+                </li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="header-buttons">
+            <a href="login.html" class="btn btn-outline">Login</a>
+            <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            <div class="dark-mode-toggle" id="darkModeToggle"></div>
+            <div class="profile-dropdown">
+                <div class="profile-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-dropdown-content">
+                    <a href="profile.html"><i class="fas fa-user-circle"></i> My Profile</a>
+                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="subscription.html"><i class="fas fa-crown"></i> Subscription</a>
+                    <a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="mood-tracking-container">
+        <div class="mood-tracker-header">
+            <h1>AI Mood Tracking</h1>
+            <p>Track your emotional patterns and gain insights into your mental wellbeing with our intelligent mood analysis system.</p>
+        </div>
+
+        <div class="mood-tracker-grid">
+            <div class="mood-input-card">
+                <h2>How are you feeling today?</h2>
+                <div class="mood-scale">
+                    <div class="mood-option">
+                        <div class="mood-icon"><i class="fas fa-angry"></i></div>
+                        <span>Angry</span>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon"><i class="fas fa-frown"></i></div>
+                        <span>Sad</span>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon"><i class="fas fa-meh"></i></div>
+                        <span>Neutral</span>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon"><i class="fas fa-smile"></i></div>
+                        <span>Happy</span>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon"><i class="fas fa-laugh"></i></div>
+                        <span>Excited</span>
+                    </div>
+                </div>
+
+                <textarea class="mood-textarea" placeholder="Tell us more about how you're feeling... What's on your mind?"></textarea>
+                <button class="mood-submit-btn">Save Mood Entry</button>
+            </div>
+
+            <div class="mood-input-card">
+                <h2>Your Current Mood Analysis</h2>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; background-color: rgba(var(--primary-rgb), 0.05); border-radius: var(--border-radius); margin-bottom: 20px;">
+                    <p>Mood chart visualization</p>
+                </div>
+                <p>Based on your recent entries, you've been feeling mostly <strong>neutral</strong> with some <strong>happy</strong> moments.</p>
+            </div>
+        </div>
+
+        <div class="mood-history">
+            <h2>Your Mood History</h2>
+            <div class="mood-history-item">
+                <div class="mood-history-icon" style="background-color: rgba(139, 194, 160, 0.2); color: var(--secondary);">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="mood-history-content">
+                    <div class="mood-history-date">Today, 10:30 AM</div>
+                    <div class="mood-history-text">Feeling good after my morning meditation session. The sun is shining!</div>
+                    <div class="mood-history-actions">
+                        <button><i class="fas fa-edit"></i> Edit</button>
+                        <button><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mood-history-item">
+                <div class="mood-history-icon" style="background-color: rgba(74, 125, 184, 0.2); color: var(--primary);">
+                    <i class="fas fa-meh"></i>
+                </div>
+                <div class="mood-history-content">
+                    <div class="mood-history-date">Yesterday, 8:45 PM</div>
+                    <div class="mood-history-text">Tired after a long day at work. Need to get more sleep tonight.</div>
+                    <div class="mood-history-actions">
+                        <button><i class="fas fa-edit"></i> Edit</button>
+                        <button><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mood-history-item">
+                <div class="mood-history-icon" style="background-color: rgba(212, 165, 165, 0.2); color: var(--accent);">
+                    <i class="fas fa-frown"></i>
+                </div>
+                <div class="mood-history-content">
+                    <div class="mood-history-date">Yesterday, 12:30 PM</div>
+                    <div class="mood-history-text">Frustrated with a project at work. Need to take a break and breathe.</div>
+                    <div class="mood-history-actions">
+                        <button><i class="fas fa-edit"></i> Edit</button>
+                        <button><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mood-insights">
+            <h2>AI-Generated Insights</h2>
+            <div class="insight-card">
+                <h3>Weekly Pattern</h3>
+                <p>Your mood tends to be lowest on Monday mornings and improves as the week progresses. Consider scheduling lighter tasks on Mondays.</p>
+            </div>
+            <div class="insight-card">
+                <h3>Positive Triggers</h3>
+                <p>You report feeling happiest after exercise and time spent outdoors. Try to incorporate these activities more regularly.</p>
+            </div>
+            <div class="insight-card">
+                <h3>Stress Indicators</h3>
+                <p>When you report less than 7 hours of sleep, your mood scores drop by 30%. Prioritizing sleep may significantly improve your wellbeing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reuse your footer from the main page -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Calmify</h3>
+                <p>Your journey to mental wellness starts here. We provide tools, community, and professional support to help you manage stress and anxiety.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="features.html"><i class="fas fa-chevron-right"></i> Features</a></li>
+                    <li><a href="about.html"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="success-stories.html"><i class="fas fa-chevron-right"></i> Success Stories</a></li>
+                    <li><a href="pricing.html"><i class="fas fa-chevron-right"></i> Pricing</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="blog.html"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                    <li><a href="help-center.html"><i class="fas fa-chevron-right"></i> Help Center</a></li>
+                    <li><a href="community.html"><i class="fas fa-chevron-right"></i> Community</a></li>
+                    <li><a href="webinars.html"><i class="fas fa-chevron-right"></i> Webinars</a></li>
+                    <li><a href="support.html"><i class="fas fa-chevron-right"></i> Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-column newsletter">
+                <h3>Newsletter</h3>
+                <p>Subscribe to receive mental wellness tips, new feature updates, and exclusive offers.</p>
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Your email address">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Calmify. All rights reserved. Designed with <i class="fas fa-heart" style="color: var(--accent);"></i> for mental wellness.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            // Save theme preference
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Mood selection
+        const moodOptions = document.querySelectorAll('.mood-option');
+        moodOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                moodOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

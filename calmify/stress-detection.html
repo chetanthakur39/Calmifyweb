@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Detection | Calmify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reuse your existing CSS variables and base styles */
+        :root {
+            --primary-light: #6c9bc5;
+            --primary: #4a7db8;
+            --primary-dark: #2a5d9e;
+            --secondary: #8bc2a0;
+            --accent: #d4a5a5;
+            --background: #f0f5fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --header-height: 80px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --border-radius: 16px;
+        }
+
+        .dark-mode {
+            --primary-light: #7dabdf;
+            --primary: #5a8bc9;
+            --primary-dark: #3a6db0;
+            --secondary: #9dd9b6;
+            --accent: #e4b9b9;
+            --background: #121826;
+            --text: #e2e8f0;
+            --card-bg: #1a243a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Reuse your existing base styles here */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            scroll-behavior: smooth;
+        }
+
+        /* Page-specific styles */
+        .stress-detection-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 5% 50px;
+        }
+
+        .stress-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .stress-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .stress-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.7;
+        }
+
+        .stress-detection-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .stress-level {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(#8bc2a0 0% 30%, #4a7db8 30% 70%, #d4a5a5 70% 100%);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .stress-level::before {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+        }
+
+        .stress-value {
+            position: relative;
+            z-index: 1;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stress-description {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .stress-description.low {
+            color: var(--secondary);
+        }
+
+        .stress-description.medium {
+            color: var(--primary);
+        }
+
+        .stress-description.high {
+            color: var(--accent);
+        }
+
+        .detection-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .method-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .method-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(var(--primary-rgb), 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--primary);
+            font-size: 30px;
+        }
+
+        .method-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .method-card p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .start-detection-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .start-detection-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.2);
+        }
+
+        .stress-tips {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .stress-tips h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .tip-card {
+            background-color: rgba(var(--primary-rgb), 0.05);
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+
+        .tip-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .tip-card h3 i {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .stress-level {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .stress-level::before {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .stress-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Reuse your header from the main page -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-spa"></i>
+            Calmify
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li class="dropdown">
+                    <a href="#">Features <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="mood-tracking.html"><i class="fas fa-brain"></i> AI Mood Tracking</a>
+                        <a href="stress-detection.html"><i class="fas fa-heartbeat"></i> Stress Detection</a>
+                        <a href="vr-meditation.html"><i class="fas fa-vr-cardboard"></i> VR Meditation</a>
+                        <a href="reports.html"><i class="fas fa-chart-line"></i> Mental Status Reports</a>
+                        <a href="psychologists.html"><i class="fas fa-user-md"></i> Book a Psychologist</a>
+                        <a href="meetups.html"><i class="fas fa-users"></i> Wellness Meetups</a>
+                        <a href="games.html"><i class="fas fa-gamepad"></i> Relaxing Games</a>
+                        <a href="shop.html"><i class="fas fa-shopping-cart"></i> Shop Products</a>
+                        <a href="chatbot.html"><i class="fas fa-robot"></i> AI Chatbot</a>
+                        <a href="mood-scanner.html"><i class="fas fa-camera"></i> Mood Scanner</a>
+                    </div>
+                </li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="header-buttons">
+            <a href="login.html" class="btn btn-outline">Login</a>
+            <a href="signup.html" class="btn btn-primary">Sign Up</a>
+            <div class="dark-mode-toggle" id="darkModeToggle"></div>
+            <div class="profile-dropdown">
+                <div class="profile-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-dropdown-content">
+                    <a href="profile.html"><i class="fas fa-user-circle"></i> My Profile</a>
+                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="subscription.html"><i class="fas fa-crown"></i> Subscription</a>
+                    <a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="stress-detection-container">
+        <div class="stress-header">
+            <h1>Stress Detection</h1>
+            <p>Our advanced system analyzes your biometric data to detect stress levels and provide real-time recommendations to help you relax and regain balance.</p>
+        </div>
+
+        <div class="stress-detection-card">
+            <div class="stress-level">
+                <div class="stress-value">42</div>
+            </div>
+            <h2>Your Current Stress Level</h2>
+            <p class="stress-description medium">Moderate Stress</p>
+            <p>You're experiencing typical daily stress. Try taking a short break or practicing deep breathing to help relax.</p>
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary);">Detection Methods</h2>
+        <div class="detection-methods">
+            <div class="method-card">
+                <div class="method-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3>Heart Rate Analysis</h3>
+                <p>Measures variations in your heart rate to detect stress patterns and autonomic nervous system activity.</p>
+                <button class="start-detection-btn">Start Measurement</button>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h3>Voice Analysis</h3>
+                <p>Analyzes subtle changes in your voice patterns that may indicate stress or emotional tension.</p>
+                <button class="start-detection-btn">Start Measurement</button>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">
+                    <i class="fas fa-keyboard"></i>
+                </div>
+                <h3>Typing Pattern</h3>
+                <p>Detects changes in your typing speed and rhythm that may correlate with increased stress levels.</p>
+                <button class="start-detection-btn">Start Measurement</button>
+            </div>
+        </div>
+
+        <div class="stress-tips">
+            <h2>Stress Reduction Tips</h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <h3><i class="fas fa-wind"></i> Deep Breathing</h3>
+                    <p>Practice the 4-7-8 technique: inhale for 4 seconds, hold for 7, exhale for 8. Repeat 4 times.</p>
+                </div>
+                <div class="tip-card">
+                    <h3><i class="fas fa-walking"></i> Short Walk</h3>
+                    <p>A 10-minute walk can reduce stress hormones and improve your mood significantly.</p>
+                </div>
+                <div class="tip-card">
+                    <h3><i class="fas fa-music"></i> Calming Music</h3>
+                    <p>Listen to slow-tempo instrumental music to lower blood pressure and heart rate.</p>
+                </div>
+                <div class="tip-card">
+                    <h3><i class="fas fa-leaf"></i> Nature Sounds</h3>
+                    <p>Natural sounds like flowing water or birdsong can quickly reduce stress responses.</p>
+                </div>
+                <div class="tip-card">
+                    <h3><i class="fas fa-hands"></i> Progressive Relaxation</h3>
+                    <p>Tense and relax each muscle group starting from your toes up to your face.</p>
+                </div>
+                <div class="tip-card">
+                    <h3><i class="fas fa-book"></i> Journaling</h3>
+                    <p>Write down your thoughts for 5-10 minutes to process emotions and reduce stress.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reuse your footer from the main page -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Calmify</h3>
+                <p>Your journey to mental wellness starts here. We provide tools, community, and professional support to help you manage stress and anxiety.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="features.html"><i class="fas fa-chevron-right"></i> Features</a></li>
+                    <li><a href="about.html"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="success-stories.html"><i class="fas fa-chevron-right"></i> Success Stories</a></li>
+                    <li><a href="
